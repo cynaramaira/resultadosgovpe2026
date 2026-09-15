@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apuração 2026 — Jamildo.com</title>
+    <title>Apuração Simulada 2026 — Jamildo.com</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;1,400&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -19,45 +21,31 @@
             --borda: rgba(255,255,255,0.07);
             --texto: #e8eaf0;
             --texto-suave: #8892a4;
+            --verde-eleito: #10b981;
+            --amarelo-turno: #f59e0b;
             --fonte-display: 'Barlow Condensed', sans-serif;
             --fonte-corpo: 'Barlow', sans-serif;
-            
-            --cor-eleito: #22c55e;
-            --cor-segundo-turno: #eab308;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         html { scroll-behavior: smooth; }
-
+        
         body {
             font-family: var(--fonte-corpo);
             background-color: var(--escuro);
             color: var(--texto);
             min-height: 100vh;
-            overflow-x: hidden;
+            padding-bottom: 50px;
         }
 
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background-image:
+            background-image: 
                 linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
             background-size: 40px 40px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            top: -30%;
-            left: -10%;
-            width: 55%;
-            height: 70%;
-            background: radial-gradient(ellipse, rgba(2,71,150,0.12) 0%, transparent 65%);
             pointer-events: none;
             z-index: 0;
         }
@@ -83,7 +71,7 @@
             display: block;
         }
 
-        .header-badge {
+        .badge-ao-vivo {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -99,7 +87,7 @@
             color: var(--laranja);
         }
 
-        .header-badge .dot {
+        .badge-ao-vivo .dot {
             width: 7px;
             height: 7px;
             background: var(--laranja);
@@ -112,65 +100,27 @@
             50% { opacity: 0.4; transform: scale(0.7); }
         }
 
-        .hero {
+        main {
             position: relative;
             z-index: 1;
-            padding: 48px 24px 24px;
-            text-align: center;
-        }
-
-        .hero-label {
-            display: inline-block;
-            font-family: var(--fonte-display);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: var(--texto-suave);
-            margin-bottom: 10px;
-        }
-
-        .hero h1 {
-            font-family: var(--fonte-display);
-            font-size: clamp(2.4rem, 6vw, 4rem);
-            font-weight: 900;
-            line-height: 1;
-            letter-spacing: -0.01em;
-            text-transform: uppercase;
-            color: #fff;
-        }
-
-        .hero h1 span {
-            color: var(--laranja);
-        }
-
-        .hero-sub {
-            margin-top: 8px;
-            font-size: 0.9rem;
-            color: var(--texto-suave);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
         }
 
         .totalizacao-wrapper {
-            position: relative;
-            z-index: 1;
-            max-width: 720px;
-            margin: 32px auto;
-            padding: 0 24px;
-        }
-
-        .totalizacao-card {
             background: var(--escuro-2);
             border: 1px solid var(--borda);
             border-radius: 16px;
             padding: 20px 28px;
+            margin-bottom: 24px;
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
             gap: 24px;
         }
 
-        .tot-bloco { }
-
+        .tot-bloco { text-align: center; }
         .tot-label {
             font-family: var(--fonte-display);
             font-size: 0.65rem;
@@ -179,7 +129,6 @@
             color: var(--texto-suave);
             margin-bottom: 4px;
         }
-
         .tot-valor {
             font-family: var(--fonte-display);
             font-size: 2.2rem;
@@ -187,16 +136,8 @@
             line-height: 1;
             color: #fff;
         }
-
-        .tot-valor.destaque {
-            color: var(--laranja);
-        }
-
-        .tot-divider {
-            width: 1px;
-            height: 48px;
-            background: var(--borda);
-        }
+        .tot-valor.destaque { color: var(--laranja); }
+        .tot-divider { width: 1px; height: 48px; background: var(--borda); }
 
         .tot-barra-wrap {
             grid-column: 1 / -1;
@@ -204,8 +145,8 @@
             height: 6px;
             border-radius: 3px;
             overflow: hidden;
+            margin-top: 10px;
         }
-
         .tot-barra-fill {
             height: 100%;
             border-radius: 3px;
@@ -214,33 +155,36 @@
             width: 0%;
         }
 
-        .apuracao-wrapper {
-            position: relative;
-            z-index: 1;
-            max-width: 720px;
-            margin: 0 auto 60px;
-            padding: 0 24px;
+        /* Sistema de Abas */
+        .abas-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
-        .secao-titulo {
-            font-family: var(--fonte-display);
-            font-size: 0.65rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+        .aba-btn {
+            background: var(--escuro-2);
+            border: 1px solid var(--borda);
             color: var(--texto-suave);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-family: var(--fonte-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
         }
 
-        .secao-titulo::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--borda);
-        }
+        .aba-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+        .aba-btn.ativa { background: var(--azul); color: #fff; border-color: var(--azul); box-shadow: 0 4px 15px var(--azul-glow); }
+        .aba-btn.ativa:nth-child(even) { background: var(--laranja); border-color: var(--laranja); box-shadow: 0 4px 15px var(--laranja-glow); }
 
+        .conteudo-painel { display: none; }
+        .conteudo-painel.ativo { display: block; }
+
+        /* Cards de Apuração Estilo Dashboard */
         .card-candidato {
             background: var(--escuro-2);
             border: 1px solid var(--borda);
@@ -251,33 +195,10 @@
             grid-template-columns: auto 1fr auto;
             gap: 0 20px;
             align-items: center;
-            position: relative;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(16px);
-            animation: card-enter 0.5s forwards;
         }
 
-        @keyframes card-enter {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-candidato::before {
-            content: '';
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0.6;
-        }
-
-        .card-laranja::before { background: radial-gradient(circle, var(--laranja-glow), transparent 70%); }
-        .card-azul::before    { background: radial-gradient(circle, var(--azul-glow),   transparent 70%); }
-        .card-laranja { border-left: 3px solid var(--laranja); }
-        .card-azul    { border-left: 3px solid var(--azul); }
+        .card-candidato:nth-child(odd) { border-left: 3px solid var(--laranja); }
+        .card-candidato:nth-child(even) { border-left: 3px solid var(--azul); }
 
         .card-foto-wrap {
             position: relative;
@@ -285,26 +206,13 @@
             height: 68px;
             flex-shrink: 0;
         }
-
         .card-foto {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            display: block;
             background: var(--escuro-3);
         }
-
-        .card-foto-ring {
-            position: absolute;
-            inset: -3px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-        }
-
-        .card-laranja .card-foto-ring { border-color: var(--laranja); }
-        .card-azul    .card-foto-ring { border-color: var(--azul); }
-
         .card-posicao {
             position: absolute;
             bottom: -2px;
@@ -320,349 +228,378 @@
             font-weight: 900;
             border: 2px solid var(--escuro-2);
             color: #fff;
+            background: var(--azul);
         }
-
-        .card-laranja .card-posicao { background: var(--laranja); }
-        .card-azul    .card-posicao { background: var(--azul); }
+        .card-candidato:nth-child(odd) .card-posicao { background: var(--laranja); }
 
         .card-info { min-width: 0; }
-
-        .card-top-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
         .card-nome {
             font-family: var(--fonte-display);
             font-size: 1.15rem;
             font-weight: 800;
-            letter-spacing: 0.02em;
             text-transform: uppercase;
             color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .card-partido {
-            flex-shrink: 0;
+            display: inline-block;
             font-family: var(--fonte-display);
-            font-size: 0.62rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
             text-transform: uppercase;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            background: rgba(255,255,255,0.08);
+            color: var(--texto-suave);
         }
 
-        .card-laranja .card-partido { background: rgba(248,61,3,0.15); color: var(--laranja); border: 1px solid rgba(248,61,3,0.3); }
-        .card-azul    .card-partido { background: rgba(2,71,150,0.2);  color: #5fa3f0;        border: 1px solid rgba(2,71,150,0.4); }
-
+        .selos-container { display: flex; gap: 6px; margin-top: 4px; }
         .selo-status {
             font-family: var(--fonte-display);
-            font-size: 0.6rem;
-            font-weight: 800;
-            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+            font-weight: 700;
             text-transform: uppercase;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
             color: #fff;
         }
-        .selo-eleito { background-color: var(--cor-eleito); }
-        .selo-2turno { background-color: var(--cor-segundo-turno); color: #000; }
+        .selo-status.eleito { background-color: var(--verde-eleito); }
+
+        .card-votos { text-align: right; flex-shrink: 0; }
+        .card-pct { font-family: var(--fonte-display); font-size: 2rem; font-weight: 900; line-height: 1; color: #fff; }
+        .card-num-votos { font-family: var(--fonte-display); font-size: 0.75rem; color: var(--texto-suave); margin-top: 2px; }
 
         .barra-wrap {
+            grid-column: 1 / -1;
             background: rgba(255,255,255,0.06);
             height: 5px;
             border-radius: 3px;
             overflow: hidden;
-            position: relative;
+            margin-top: 12px;
         }
-
         .barra-fill {
             height: 100%;
             border-radius: 3px;
             width: 0%;
-            transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--azul);
+            transition: width 1s ease;
         }
+        .card-candidato:nth-child(odd) .barra-fill { background: var(--laranja); }
 
-        .card-laranja .barra-fill { background: linear-gradient(90deg, #c42900, var(--laranja), #ff7043); }
-        .card-azul    .barra-fill { background: linear-gradient(90deg, #013270, var(--azul), #1565c0); }
-
-        .card-votos {
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .card-pct {
-            font-family: var(--fonte-display);
-            font-size: 2rem;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .card-laranja .card-pct { color: var(--laranja); }
-        .card-azul    .card-pct { color: #5fa3f0; }
-
-        .card-num-votos {
-            font-family: var(--fonte-display);
-            font-size: 0.75rem;
-            font-weight: 600;
+        .estado-mensagem {
+            background: var(--escuro-2);
+            border: 1px solid var(--borda);
+            border-radius: 16px;
+            padding: 50px 20px;
+            text-align: center;
             color: var(--texto-suave);
-            margin-top: 2px;
-            white-space: nowrap;
-        }
-
-        .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 24px;
-            gap: 16px;
-            color: var(--texto-suave);
-        }
-
-        .spinner {
-            width: 36px;
-            height: 36px;
-            border: 3px solid rgba(255,255,255,0.08);
-            border-top-color: var(--laranja);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-txt {
             font-family: var(--fonte-display);
-            font-size: 0.75rem;
-            letter-spacing: 0.12em;
             text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         footer {
-            position: relative;
-            z-index: 1;
             text-align: center;
-            padding: 24px;
-            border-top: 1px solid var(--borda);
-            color: var(--texto-suave);
+            padding: 30px 20px;
             font-size: 0.75rem;
-        }
-
-        footer a { color: var(--texto-suave); text-decoration: none; }
-        footer a:hover { color: var(--laranja); }
-
-        @media (max-width: 560px) {
-            .totalizacao-card { grid-template-columns: 1fr 1fr; }
-            .tot-divider { display: none; }
-            .tot-barra-wrap { grid-column: 1 / -1; }
-            .card-candidato { grid-template-columns: auto 1fr; }
-            .card-votos { grid-column: 2; grid-row: 1; text-align: right; }
-            .card-foto-wrap { width: 56px; height: 56px; }
-            .card-pct { font-size: 1.5rem; }
+            color: var(--texto-suave);
+            border-top: 1px solid var(--borda);
+            margin-top: 60px;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="header-logo">
-        <img src="https://jamildo.com/media/uploads/brancologojamildo_6xe6mA0.png" alt="Jamildo.com">
-    </div>
-    <div class="header-badge">
-        <span class="dot"></span>
-        Apuração ao vivo · 2026
-    </div>
-</header>
-
-<section class="hero">
-    <span class="hero-label">Eleições 2026 · Governo de Pernambuco</span>
-    <h1>Resultado<br><span>em tempo real</span></h1>
-    <p class="hero-sub">Dados oficiais do Tribunal Superior Eleitoral · Atualizado automaticamente</p>
-</section>
-
-<div class="totalizacao-wrapper">
-    <div class="totalizacao-card">
-        <div class="tot-bloco">
-            <div class="tot-label">Seções totalizadas</div>
-            <div class="tot-valor destaque" id="pstTexto">—</div>
+    <header>
+        <div class="header-logo">
+            <img src="https://jamildo.com/media/uploads/brancologojamildo_6xe6mA0.png" alt="Logo Jamildo.com">
         </div>
-        <div class="tot-divider"></div>
-        <div class="tot-bloco" style="text-align:right">
-            <div class="tot-label">Última atualização do TSE</div>
-            <div class="tot-valor" id="ultimaAtualizacao" style="font-size:1.1rem;color:#fff;font-weight:700;">—</div>
+        <div class="badge-ao-vivo">
+            <div class="dot"></div>
+            <span>Simulado TSE 2026</span>
         </div>
-        <div class="tot-barra-wrap">
-            <div class="tot-barra-fill" id="barraTotalizacao"></div>
+    </header>
+
+    <main>
+        <!-- Card de Totalização Geral -->
+        <section class="totalizacao-wrapper">
+            <div class="tot-bloco">
+                <div class="tot-label">Seções Apuradas</div>
+                <div class="tot-valor destaque" id="percentual-totalizado">0,00%</div>
+            </div>
+            <div class="tot-divider"></div>
+            <div class="tot-bloco">
+                <div class="tot-label">Horário Oficial TSE</div>
+                <div class="tot-valor" id="horario-tse">00:00:00</div>
+            </div>
+            <div class="tot-barra-wrap">
+                <div class="tot-barra-fill" id="barra-totalizacao-fill"></div>
+            </div>
+        </section>
+
+        <!-- Abas de Navegação -->
+        <nav class="abas-container">
+            <button class="aba-btn ativa" onclick="alternarAba('0005')">Senador</button>
+            <button class="aba-btn" onclick="alternarAba('0006')">Dep. Federal</button>
+            <button class="aba-btn" onclick="alternarAba('0007')">Dep. Estadual</button>
+        </nav>
+
+        <!-- Container de Carregamento -->
+        <div id="container-loading" class="estado-mensagem">
+            <div class="texto-mensagem">Consultando servidor do simulado...</div>
         </div>
-    </div>
-</div>
 
-<div class="apuracao-wrapper">
-    <div class="secao-titulo">Candidatos ao Governo</div>
-    <div id="listaApuracao">
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <span class="loading-txt">Conectando ao TSE…</span>
-        </div>
-    </div>
-</div>
+        <!-- Conteúdo das Abas -->
+        <section id="painel-0005" class="conteudo-painel ativo">
+            <div id="lista-candidatos"></div>
+        </section>
 
-<footer>
-    Dados: <a href="https://resultados.tse.jus.br" target="_blank">Tribunal Superior Eleitoral (TSE)</a> &nbsp;·&nbsp;
-    <a href="https://jamildo.com" target="_blank">jamildo.com</a>
-</footer>
+        <section id="painel-0006" class="conteudo-painel">
+            <div id="lista-candidatos-federais"></div>
+        </section>
 
-<script>
-    const config = {
-        worker:  "https://tse-proxy-2026.cynaramaira.workers.dev/",
-        ciclo:   "ele2024",   
-        eleicao: "6265",      
-        uf:      "pb"         
-    };
+        <section id="painel-0007" class="conteudo-painel">
+            <div id="lista-candidatos-estaduais"></div>
+        </section>
+    </main>
 
-    let intervaloId = null;
-    const memoriaHistoricoResultados = {};
+    <footer>
+        <p>Portal jamildo.com — Cobertura Especial das Eleições 2026.</p>
+    </footer>
 
-    // INÍCIO DA FUNÇÃO ATUALIZAR
-    async function atualizar() {
-        try {
-            const res   = await fetch(config.worker);
-            const dados = await res.json();
+    <script>
+        const WORKER_BASE_URL = "https://tse-2022-teste.cynaramaira.workers.dev/";
+        let cargoAtivo = "0005";
+        let temporizadorAtualizacao = null;
+        const memoriaHistoricoResultados = {};
 
-            const pstRaw  = dados.s.pst || "0,00";
-            const pstNum  = parseFloat(pstRaw.replace(',', '.')) || 0;   
-            const pstText = pstRaw + '%';
-
-            const horaTSE = dados.hg || "--:--:--";
-            const dataTSE = dados.dg || "";
-            
-            document.getElementById('pstTexto').textContent = pstText;
-            document.getElementById('barraTotalizacao').style.width = pstNum + '%';
-            document.getElementById('ultimaAtualizacao').textContent = `${horaTSE} (${dataTSE})`;
-
-            if (pstRaw === "100,00" && intervaloId !== null) {
-                clearInterval(intervaloId);
-                intervaloId = null; 
-                document.getElementById('ultimaAtualizacao').textContent = `${horaTSE} — Apuração Concluída`;
-            }
-
-            const cargo = dados.carg[0];
-            let totalVotosValidos = 0;
-            const candidatos = [];
-
-            cargo.agr.forEach(alianca => {
-                const siglaPartido = alianca.nm || "S/P";
-
-                const processarCandidato = (c) => {
-                    const votos = parseInt(c.vap) || 0;   
-                    totalVotosValidos += votos;
-
-                    const foto = `https://resultados.tse.jus.br/oficial/${config.ciclo}/${config.eleicao}/fotos/${config.uf}/${c.sqcand}.jpeg`;
-                    
-                    // Tratamento para aceitar qualquer variação de campo do TSE e forçar letras minúsculas
-                    let situacaoTSE = (c.st || c.e || c.sit || c.dvt || "").toString().toLowerCase().trim(); 
-
-                    if ((situacaoTSE === 'e' || situacaoTSE === 'me' || situacaoTSE === '2t' || situacaoTSE === 'eleito') && !memoriaHistoricoResultados[c.nm]) {
-                        memoriaHistoricoResultados[c.nm] = horaTSE;
-                    }
-
-                    candidatos.push({ 
-                        nome: c.nm, 
-                        partido: siglaPartido, 
-                        votos, 
-                        foto, 
-                        situacao: situacaoTSE,
-                        horaVitoria: memoriaHistoricoResultados[c.nm] || ""
-                    });
-                };
-
-                if (alianca.cand) alianca.cand.forEach(processarCandidato);
-                if (alianca.par)  alianca.par.forEach(p => p.cand && p.cand.forEach(processarCandidato));
-            });
-
-            candidatos.sort((a, b) => b.votos - a.votos);
-            renderizarCards(candidatos, totalVotosValidos);
-
-        } catch (e) {
-            console.error('[Jamildo Apuração]', e);
+        function tratarFalhaImagem(img) {
+            img.onerror = null;
+            img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23111827'/><text x='50%25' y='55%25' font-family='sans-serif' font-size='14' fill='%238892a4' text-anchor='middle'>FOTO</text></svg>";
         }
-    }
-    // FIM DA FUNÇÃO ATUALIZAR
 
-    // INÍCIO DA FUNÇÃO RENDERIZAR CARDS
-    function renderizarCards(lista, total) {
-        const container = document.getElementById('listaApuracao');
-        container.innerHTML = '';
+        function alternarAba(codigoCargo) {
+            cargoAtivo = codigoCargo;
+            
+            document.querySelectorAll(".aba-btn").forEach((btn, index) => {
+                const listaCargos = ["0005", "0006", "0007"];
+                if (listaCargos[index] === codigoCargo) {
+                    btn.classList.add("ativa");
+                } else {
+                    btn.classList.remove("ativa");
+                }
+            });
 
-        lista.forEach((c, i) => {
-            const percNum = total > 0 ? (c.votos / total) * 100 : 0;
-            const percDisplay = percNum.toFixed(2).replace('.', ',') + '%';
-            const cor = i % 2 === 0 ? 'laranja' : 'azul';
+            document.querySelectorAll(".conteudo-painel").forEach(painel => {
+                if (painel.id === "painel-" + (codigoCargo === "0005" ? "senador" : (codigoCargo === "0006" ? "deputado-federal" : "deputado-estadual"))) {
+                    painel.classList.add("ativo");
+                } else {
+                    painel.classList.remove("ativo");
+                }
+            });
 
-            let seloHTML = '';
-            if (c.situacao === 'e' || c.situacao === 'me' || c.situacao === 'eleito') {
-                const sufixoHora = c.horaVitoria ? ` às ${c.horaVitoria}` : '';
-                seloHTML = `<span class="selo-status selo-eleito">Eleito${sufixoHora}</span>`;
-            } else if (c.situacao === '2t') {
-                const sufixoHora = c.horaVitoria ? ` às ${c.horaVitoria}` : '';
-                seloHTML = `<span class="selo-status selo-2turno">2º Turno${sufixoHora}</span>`;
+            // Ajuste dinâmico do ID do painel ativo
+            if(codigoCargo === "0005") {
+                document.getElementById("painel-0005").classList.add("ativo");
+                document.getElementById("painel-0006").classList.remove("ativo");
+                document.getElementById("painel-0007").classList.remove("ativo");
+            } else if(codigoCargo === "0006") {
+                document.getElementById("painel-0005").classList.remove("ativo");
+                document.getElementById("painel-0006").classList.add("ativo");
+                document.getElementById("painel-0007").classList.remove("ativo");
+            } else {
+                document.getElementById("painel-0005").classList.remove("ativo");
+                document.getElementById("painel-0006").classList.remove("ativo");
+                document.getElementById("painel-0007").classList.add("ativo");
             }
 
-            const card = document.createElement('div');
-            card.className = `card-candidato card-${cor}`;
-            card.style.animationDelay = `${i * 80}ms`;
+            buscarDadosSimulado();
+        }
 
-            card.innerHTML = `
-                <div class="card-foto-wrap">
-                    <img
-                        src="${c.foto}"
-                        alt="${c.nome}"
-                        class="card-foto"
-                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'68\\' height=\\'68\\'%3E%3Crect width=\\'68\\' height=\\'68\\' rx=\\'34\\' fill=\\'%231c2535\\'/%3E%3C/svg%3E'"
-                    >
-                    <div class="card-foto-ring"></div>
-                    <div class="card-posicao">${i + 1}º</div>
-                </div>
+        async function buscarDadosSimulado() {
+            const urlCompleta = WORKER_BASE_URL + "?cargo=" + cargoAtivo;
 
-                <div class="card-info">
-                    <div class="card-top-row">
-                        <span class="card-nome">${c.nome}</span>
-                        <span class="card-partido">${c.partido}</span>
-                        ${seloHTML}
-                    </div>
-                    <div class="barra-wrap">
-                        <div class="barra-fill" data-width="${percNum.toFixed(4)}"></div>
-                    </div>
-                </div>
+            try {
+                const resposta = await fetch(urlCompleta);
+                if (!resposta.ok) {
+                    throw new Error("Erro de comunicação com o simulado.");
+                }
 
-                <div class="card-votos">
-                    <div class="card-pct">${percDisplay}</div>
-                    <div class="card-num-votos">${c.votos.toLocaleString('pt-BR')} votos</div>
-                </div>
-            `;
+                const dadosJSON = await resposta.json();
+                processarEExibir(dadosJSON);
+            } catch (erro) {
+                console.error("Falha no fetch:", erro);
+                document.getElementById("container-loading").innerHTML = "Aguardando liberação da base de dados pelo TSE...";
+            }
+        }
 
-            container.appendChild(card);
+        function processarEExibir(dados) {
+            // Horário oficial direto do servidor do TSE (campos hg ou ht)
+            const horaOficialTSE = dados.ht || (dados.hg || "00:00:00");
+            document.getElementById("horario-tse").textContent = horaOficialTSE;
 
-            requestAnimationFrame(() => {
-                const fill = card.querySelector('.barra-fill');
-                if (fill) fill.style.width = fill.dataset.width + '%';
+            // Percentual de seções totalizadas (pst)
+            let percentualStr = "0,00";
+            if (dados.s && dados.s.pst) {
+                percentualStr = dados.s.pst;
+            } else if (dados.pst) {
+                percentualStr = dados.pst;
+            }
+            document.getElementById("percentual-totalizado").textContent = percentualStr + "%";
+            document.getElementById("barra-totalizacao-fill").style.width = percentualStr.replace(",", ".") + "%";
+
+            // Localiza o bloco do cargo ativo no JSON unificado
+            let dadosCargo = null;
+            if (dados.carg && Array.isArray(dados.carg)) {
+                dadosCargo = dados.carg.find(c => c.cd === cargoAtivo);
+            } else if (dados.carg) {
+                dadosCargo = dados.carg;
+            } else {
+                dadosCargo = dados;
+            }
+
+            let listaCandidatos = [];
+
+            // Varredura segura na árvore unificada do TSE
+            if (dadosCargo && dadosCargo.cand) {
+                const arrCand = Object.values(dadosCargo.cand);
+                arrCand.forEach(cand => {
+                    listaCandidatos.push(estruturarCandidato(cand, horaOficialTSE));
+                });
+            } else if (dadosCargo && dadosCargo.agr) {
+                dadosCargo.agr.forEach(coligacao => {
+                    if (coligacao.cand) {
+                        Object.values(coligacao.cand).forEach(cand => {
+                            listaCandidatos.push(estruturarCandidato(cand, horaOficialTSE, coligacao.sg));
+                        });
+                    }
+                    if (coligacao.par) {
+                        coligacao.par.forEach(partido => {
+                            if (partido.cand) {
+                                Object.values(partido.cand).forEach(cand => {
+                                    listaCandidatos.push(estruturarCandidato(cand, horaOficialTSE, partido.sg));
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Ordena do mais votado para o menos votado
+            listaCandidatos.sort((a, b) => b.votosAbsolutos - a.votosAbsolutos);
+
+            document.getElementById("container-loading").style.display = "none";
+            renderizarInterface(listaCandidatos);
+
+            if (percentualStr.replace(",", ".") === "100.00") {
+                clearInterval(temporizadorAtualizacao);
+                document.getElementById("status-apuracao-texto").textContent = "Apuração Concluída";
+            }
+        }
+
+        function estruturarCandidato(cand, horaOficialTSE, partidoPadrao) {
+            const numeroUrna = cand.n || "00";
+            const idSequencial = cand.sqcand || cand.seq || "";
+            const nomeCandidato = cand.nm || "Candidato " + numeroUrna;
+            
+            let partidoSigla = partidoPadrao || "PARTIDO";
+            if (cand.cc) {
+                partidoSigla = cand.cc.split(" ")[0] || partidoSigla;
+            }
+
+            const votosValores = parseInt(cand.vap) || 0;
+            const pctValores = cand.pvap || "0,00";
+
+            let situacao = "";
+            if (cand.st) {
+                situacao = cand.st.toLowerCase().trim();
+            } else if (cand.e) {
+                situacao = cand.e.toLowerCase().trim();
+            }
+
+            let statusFormatado = "";
+            if (situacao.includes("eleito") || cand.e === "s" || cand.e === "S") {
+                statusFormatado = "eleito";
+                if (!memoriaHistoricoResultados[idSequencial]) {
+                    memoriaHistoricoResultados[idSequencial] = horaOficialTSE;
+                }
+            }
+
+            // URL oficial da foto do candidato no servidor do TSE
+            const urlFotoCandidato = "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/pe/" + idSequencial + ".jpeg";
+
+            return {
+                id: idSequencial,
+                numero: numeroUrna,
+                nome: nomeCandidato,
+                partido: partidoSigla,
+                votosAbsolutos: votosValores,
+                porcentagem: pctValores,
+                status: statusFormatado,
+                foto: urlFotoCandidato
+            };
+        }
+
+        function renderizarInterface(candidatos) {
+            let containerAlvoID = "lista-senadores";
+            if (cargoAtivo === "0006") containerAlvoID = "lista-candidatos-federais";
+            if (cargoAtivo === "0007") containerAlvoID = "lista-candidatos-estaduais";
+
+            // Se for federal ou estadual, redireciona o renderizador para as respectivas seções se necessário
+            let container = document.getElementById(cargoAtivo === "0005" ? "lista-senadores" : (cargoAtivo === "0006" ? "lista-candidatos-federais" : "lista-candidatos-estaduais"));
+            container.innerHTML = "";
+
+            if (candidatos.length === 0) {
+                container.innerHTML = "<div class='estado-mensagem'>Aguardando dados numéricos para este cargo.</div>";
+                return;
+            }
+
+            let acumularHTML = "";
+
+            candidatos.forEach((cand, indice) => {
+                const posicao = indice + 1;
+                let htmlSelo = "";
+                let htmlHora = "";
+
+                if (cand.status === "eleito") {
+                    htmlSelo = "<span class='selo-status eleito'>Eleito</span>";
+                    const horarioGravado = memoriaHistoricoResultados[cand.id] || "Confirmado";
+                    htmlHora = "<span class='hora-eleito'>Registrado às " + horarioGravada + "</span>";
+                }
+
+                acumularHTML += `
+                    <article class="card-candidato">
+                        <div class="card-foto-wrap">
+                            <img src="${cand.foto}" class="card-foto" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
+                            <div class="card-posicao">${posicao}</div>
+                        </div>
+                        <div class="card-info">
+                            <h2 class="card-nome">${cand.nome}</h2>
+                            <span class="partido-tag">${cand.partido} | nº ${cand.numero}</span>
+                            <div class="selos-container">
+                                ${htmlSelo}
+                                ${htmlHora}
+                            </div>
+                        </div>
+                        <div class="card-votos">
+                            <div class="card-pct">${cand.porcentagem}%</div>
+                            <div class="card-num-votos">${cand.votosAbsolutos.toLocaleString('pt-BR')} votos</div>
+                        </div>
+                        <div class="barra-wrap">
+                            <div class="barra-fill" style="width: ${cand.porcentagem.replace(',', '.')}%"></div>
+                        </div>
+                    </article>
+                `;
             });
-        });
-    }
-    // FIM DA FUNÇÃO RENDERIZAR CARDS
+            container.innerHTML = acumularHTML;
+        }
 
-    // Execuções e temporizadores finais
-    atualizar();
-    intervaloId = setInterval(atualizar, 60000);
-</script>
-
+        // Inicialização e Temporizador de 60 segundos respeitando as normas do TSE
+        buscarDadosSimulado();
+        temporizadorAtualizacao = setInterval(buscarDadosSimulado, 60000);
+    </script>
 </body>
 </html>
