@@ -225,9 +225,11 @@
             background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; color: var(--texto-suave); margin-top: 4px;
         }
 
-        .selos-container { display: flex; gap: 6px; margin-top: 4px; }
+        .selos-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
         .selo-status { font-family: var(--fonte-display); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; color: #fff; }
         .selo-status.eleito { background-color: var(--verde-eleito); }
+        .selo-status.segundo-turno { background-color: var(--laranja); }
+        .hora-eleito { font-size: 0.7rem; color: var(--texto-suave); }
 
         .votos-container { margin-top: auto; }
         .votos-valores { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
@@ -449,6 +451,10 @@
                         memoriaHistoricoResultados[cand.numero] = document.getElementById("horario-tse").textContent;
                     }
                     htmlHora = "<span class='hora-eleito'>Registrado às " + memoriaHistoricoResultados[cand.numero] + "</span>";
+                } else if (cand.eleito === "MAT_ELEITO") {
+                    htmlSelo = "<span class='selo-status eleito'>Matematicamente Eleito</span>";
+                } else if (cand.eleito === "2T") {
+                    htmlSelo = "<span class='selo-status segundo-turno'>2º Turno</span>";
                 }
 
                 const urlFoto = cand.foto || "";
@@ -501,6 +507,10 @@
                 let txtSeloLegislativo = "";
                 if (cand.eleito === "E") {
                     txtSeloLegislativo = " <span style='color: var(--verde-eleito); font-weight: bold; font-size: 0.8rem;'>[ELEITO]</span>";
+                } else if (cand.eleito === "MAT_ELEITO") {
+                    txtSeloLegislativo = " <span style='color: var(--verde-eleito); font-weight: bold; font-size: 0.8rem;'>[MAT. ELEITO]</span>";
+                } else if (cand.eleito === "2T") {
+                    txtSeloLegislativo = " <span style='color: var(--laranja); font-weight: bold; font-size: 0.8rem;'>[2º TURNO]</span>";
                 }
 
                 const urlFoto = cand.foto || "";
