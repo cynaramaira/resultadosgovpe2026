@@ -22,7 +22,6 @@
             --texto: #e8eaf0;
             --texto-suave: #8892a4;
             --verde-eleito: #10b981;
-            --amarelo-turno: #f59e0b;
             --fonte-display: 'Barlow Condensed', sans-serif;
             --fonte-corpo: 'Barlow', sans-serif;
         }
@@ -155,11 +154,11 @@
             width: 0%;
         }
 
-        /* Sistema de Abas */
+        /* 4 Abas no Grid */
         .abas-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             margin-bottom: 24px;
         }
 
@@ -168,13 +167,14 @@
             border: 1px solid var(--borda);
             color: var(--texto-suave);
             font-family: var(--fonte-display);
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            padding: 14px;
+            padding: 12px 6px;
             border-radius: 12px;
             cursor: pointer;
             text-transform: uppercase;
             transition: all 0.3s ease;
+            text-align: center;
         }
 
         .aba-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
@@ -184,130 +184,88 @@
         .conteudo-painel { display: none; }
         .conteudo-painel.ativo { display: block; }
 
-        /* Cards de Apuração Estilo Dashboard */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
         .card-candidato {
             background: var(--escuro-2);
             border: 1px solid var(--borda);
             border-radius: 16px;
             padding: 20px 24px;
-            margin-bottom: 12px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 0 20px;
-            align-items: center;
-        }
-
-        .card-candidato:nth-child(odd) { border-left: 3px solid var(--laranja); }
-        .card-candidato:nth-child(even) { border-left: 3px solid var(--azul); }
-
-        .card-foto-wrap {
             position: relative;
-            width: 68px;
-            height: 68px;
-            flex-shrink: 0;
-        }
-        .card-foto {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            background: var(--escuro-3);
-        }
-        .card-posicao {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--fonte-display);
-            font-size: 0.65rem;
-            font-weight: 900;
-            border: 2px solid var(--escuro-2);
-            color: #fff;
-            background: var(--azul);
-        }
-        .card-candidato:nth-child(odd) .card-posicao { background: var(--laranja); }
-
-        .card-info { min-width: 0; }
-        .card-nome {
-            font-family: var(--fonte-display);
-            font-size: 1.15rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #fff;
-            white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
-        .card-partido {
-            display: inline-block;
-            font-family: var(--fonte-display);
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-top: 4px;
-            background: rgba(255,255,255,0.08);
-            color: var(--texto-suave);
+
+        .card-candidato:nth-child(odd) { border-left: 4px solid var(--laranja); }
+        .card-candidato:nth-child(even) { border-left: 4px solid var(--azul); }
+
+        .topo-card { display: flex; align-items: center; gap: 15px; }
+        .foto-container { position: relative; width: 68px; height: 68px; flex-shrink: 0; }
+        .foto-candidato { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--escuro-3); border: 2px solid var(--borda); }
+        .posicao-badge {
+            position: absolute; bottom: 0; right: 0; width: 22px; height: 22px;
+            border-radius: 50%; background: var(--azul); color: #fff;
+            font-family: var(--fonte-display); font-size: 0.75rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; border: 2px solid var(--escuro-2);
+        }
+        .card-candidato:nth-child(odd) .posicao-badge { background: var(--laranja); }
+
+        .dados-identificacao { min-width: 0; }
+        .nome-candidato {
+            font-family: var(--fonte-display); font-size: 1.15rem; font-weight: 700;
+            text-transform: uppercase; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .partido-tag {
+            display: inline-block; font-family: var(--fonte-display); font-size: 0.75rem; font-weight: 700;
+            background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; color: var(--texto-suave); margin-top: 4px;
         }
 
         .selos-container { display: flex; gap: 6px; margin-top: 4px; }
-        .selo-status {
-            font-family: var(--fonte-display);
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 4px;
-            color: #fff;
-        }
+        .selo-status { font-family: var(--fonte-display); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; color: #fff; }
         .selo-status.eleito { background-color: var(--verde-eleito); }
 
-        .card-votos { text-align: right; flex-shrink: 0; }
-        .card-pct { font-family: var(--fonte-display); font-size: 2rem; font-weight: 900; line-height: 1; color: #fff; }
-        .card-num-votos { font-family: var(--fonte-display); font-size: 0.75rem; color: var(--texto-suave); margin-top: 2px; }
+        .votos-container { margin-top: auto; }
+        .votos-valores { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+        .porcentagem-votos { font-family: var(--fonte-display); font-size: 1.8rem; font-weight: 900; color: #fff; }
+        .absoluto-votos { font-size: 0.85rem; color: var(--texto-suave); }
 
-        .barra-wrap {
-            grid-column: 1 / -1;
-            background: rgba(255,255,255,0.06);
-            height: 5px;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 12px;
-        }
-        .barra-fill {
-            height: 100%;
-            border-radius: 3px;
-            width: 0%;
-            background: var(--azul);
-            transition: width 1s ease;
-        }
-        .card-candidato:nth-child(odd) .barra-fill { background: var(--laranja); }
+        .barra-candidato-wrap { background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; overflow: hidden; }
+        .barra-candidato-preenchimento { height: 100%; width: 0%; background: var(--azul); transition: width 1s ease; }
+        .card-candidato:nth-child(odd) .barra-candidato-preenchimento { background: var(--laranja); }
+
+        /* Tabela para parlamentares */
+        .tabela-legislativo { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .tabela-legislativo th { font-family: var(--fonte-display); text-transform: uppercase; font-size: 0.85rem; color: var(--texto-suave); padding: 10px 16px; text-align: left; }
+        .tabela-legislativo th.dir { text-align: right; }
+        .linha-candidato { background: var(--escuro-2); transition: transform 0.2s ease; }
+        .linha-candidato td { padding: 12px 16px; border-top: 1px solid var(--borda); border-bottom: 1px solid var(--borda); }
+        .linha-candidato td:first-child { border-left: 1px solid var(--borda); border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+        .linha-candidato td:last-child { border-right: 1px solid var(--borda); border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+        .celula-perfil { display: flex; align-items: center; gap: 12px; }
+        .foto-compacta { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--escuro-3); border: 1px solid var(--borda); }
+        .nome-compacto { font-family: var(--fonte-display); font-size: 1rem; font-weight: 700; text-transform: uppercase; color: #fff; }
+        .celula-valores { text-align: right; }
+        .pct-compacta { font-family: var(--fonte-display); font-size: 1.3rem; font-weight: 700; color: #fff; }
+        .abs-compacta { font-size: 0.75rem; color: var(--texto-suave); }
 
         .estado-mensagem {
-            background: var(--escuro-2);
-            border: 1px solid var(--borda);
-            border-radius: 16px;
-            padding: 50px 20px;
-            text-align: center;
-            color: var(--texto-suave);
-            font-family: var(--fonte-display);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            background: var(--escuro-2); border: 1px solid var(--borda); border-radius: 16px;
+            padding: 50px 20px; text-align: center; color: var(--texto-suave);
+            font-family: var(--fonte-display); text-transform: uppercase; letter-spacing: 0.08em;
         }
 
-        footer {
-            text-align: center;
-            padding: 30px 20px;
-            font-size: 0.75rem;
-            color: var(--texto-suave);
-            border-top: 1px solid var(--borda);
-            margin-top: 60px;
+        footer { text-align: center; padding: 30px 20px; font-size: 0.75rem; color: var(--texto-suave); border-top: 1px solid var(--borda); margin-top: 60px; }
+
+        @media (max-width: 600px) {
+            .abas-container { grid-template-columns: repeat(2, 1fr); }
+            .totalizacao-wrapper { grid-template-columns: 1fr; gap: 12px; }
+            .tot-divider { display: none; }
         }
     </style>
 </head>
@@ -324,7 +282,6 @@
     </header>
 
     <main>
-        <!-- Card de Totalização Geral -->
         <section class="totalizacao-wrapper">
             <div class="tot-bloco">
                 <div class="tot-label">Seções Apuradas</div>
@@ -340,29 +297,51 @@
             </div>
         </section>
 
-        <!-- Abas de Navegação -->
+        <!-- 4 Abas Atualizadas (Governador = 0003, Senador = 0005, Federal = 0006, Estadual = 0007) -->
         <nav class="abas-container">
-            <button class="aba-btn ativa" onclick="alternarAba('0005')">Senador</button>
+            <button class="aba-btn ativa" onclick="alternarAba('0003')">Governador</button>
+            <button class="aba-btn" onclick="alternarAba('0005')">Senador</button>
             <button class="aba-btn" onclick="alternarAba('0006')">Dep. Federal</button>
             <button class="aba-btn" onclick="alternarAba('0007')">Dep. Estadual</button>
         </nav>
 
-        <!-- Container de Carregamento -->
         <div id="container-loading" class="estado-mensagem">
             <div class="texto-mensagem">Consultando servidor do simulado...</div>
         </div>
 
-        <!-- Conteúdo das Abas -->
-        <section id="painel-0005" class="conteudo-painel ativo">
-            <div id="lista-candidatos"></div>
+        <!-- Painéis de Conteúdo para cada cargo -->
+        <section id="painel-0003" class="conteudo-painel ativo">
+            <div class="grid-cards" id="lista-governador"></div>
+        </section>
+
+        <section id="painel-0005" class="conteudo-painel">
+            <div class="grid-cards" id="lista-senador"></div>
         </section>
 
         <section id="painel-0006" class="conteudo-painel">
-            <div id="lista-candidatos-federais"></div>
+            <table class="tabela-legislativo">
+                <thead>
+                    <tr>
+                        <th>Candidato</th>
+                        <th>Partido</th>
+                        <th class="dir">Votação</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-federais"></tbody>
+            </table>
         </section>
 
         <section id="painel-0007" class="conteudo-painel">
-            <div id="lista-candidatos-estaduais"></div>
+            <table class="tabela-legislativo">
+                <thead>
+                    <tr>
+                        <th>Candidato</th>
+                        <th>Partido</th>
+                        <th class="dir">Votação</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-estaduais"></tbody>
+            </table>
         </section>
     </main>
 
@@ -372,7 +351,7 @@
 
     <script>
         const WORKER_BASE_URL = "https://tse-proxy-2026.cynaramaira.workers.dev/";
-        let cargoAtivo = "0005"; // Começa em Senador (0005)
+        let cargoAtivo = "0003"; // Começa em Governador
         let temporizadorAtualizacao = null;
         const memoriaHistoricoResultados = {};
 
@@ -385,7 +364,7 @@
             cargoAtivo = codigoCargo;
             
             document.querySelectorAll(".aba-btn").forEach((btn, index) => {
-                const listaCargos = ["0005", "0006", "0007"];
+                const listaCargos = ["0003", "0005", "0006", "0007"];
                 if (listaCargos[index] === codigoCargo) {
                     btn.classList.add("ativa");
                 } else {
@@ -393,15 +372,14 @@
                 }
             });
 
-            // Gerencia visibilidade das seções com base no código do cargo
-            document.getElementById("painel-0005").classList.toggle("ativo", codigoCargo === "0005");
-            document.getElementById("painel-0006").classList.toggle("ativo", codigoCargo === "0006");
-            document.getElementById("painel-0007").classList.toggle("ativo", codigoCargo === "0007");
+            document.querySelectorAll(".conteudo-painel").forEach(painel => {
+                painel.classList.remove("ativo");
+            });
+            document.getElementById("painel-" + codigoCargo).classList.add("ativo");
 
             buscarDadosDoWorker();
         }
 
-        // Função corrigida para chamar o Worker passando o cargo correto na URL
         async function buscarDadosDoWorker() {
             const urlCompleta = WORKER_BASE_URL + "?cargo=" + cargoAtivo;
 
@@ -420,26 +398,21 @@
         }
 
         function processarEExibir(dados) {
-            // Atualiza o horário oficial vindo do Worker
             const horarioTSE = dados.dataHora || "00:00:00";
             document.getElementById("horario-tse").textContent = horarioTSE;
 
-            // Atualiza a porcentagem de apuração e a barra de progresso
             const progressoTexto = dados.andamento || "0,00";
             document.getElementById("percentual-totalizado").textContent = progressoTexto + "%";
             document.getElementById("barra-totalizacao-fill").style.width = progressoTexto.replace(",", ".") + "%";
 
-            // Seções apuradas
-            const secoesTotalizadas = dados.secoesTotalizadas || "0";
-            const secoesTotais = dados.secoes || "0";
-            document.getElementById("secoes-totalizadas").textContent = secoesTotalizadas + " / " + secoesTotais;
-
             const listaCandidatos = dados.cand || dados.candidatos || [];
 
-            if (cargoAtivo === "0005") {
-                renderizarCardsMajoritarios(listaCandidatos);
+            ocultarLoading();
+
+            if (cargoAtivo === "0003" || cargoAtivo === "0005") {
+                renderizarCardsMajoritarios(listaCandidatos, cargoAtivo === "0003" ? "lista-governador" : "lista-senador");
             } else {
-                renderizarListaLegislativa(listaCandidatos);
+                renderizarListaLegislativa(listaCandidatos, cargoAtivo === "0006" ? "lista-federais" : "lista-estaduais");
             }
 
             if (progressoTexto.replace(",", ".") === "100.00") {
@@ -448,12 +421,12 @@
             }
         }
 
-        function renderizarCardsMajoritarios(candidatos) {
-            const container = document.getElementById("lista-candidatos");
+        function renderizarCardsMajoritarios(candidatos, containerID) {
+            const container = document.getElementById(containerID);
             container.innerHTML = "";
 
             if (candidatos.length === 0) {
-                container.innerHTML = "<div class='estado-mensagem'>Aguardando dados numéricos para este cargo.</div>";
+                container.innerHTML = "<div class='estado-mensagem' style='grid-column: 1/-1;'>Aguardando dados numéricos para este cargo.</div>";
                 return;
             }
 
@@ -478,24 +451,28 @@
 
                 acumularHTML += `
                     <article class="card-candidato">
-                        <div class="card-foto-wrap">
-                            <img src="${urlFoto}" class="card-foto" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
-                            <div class="card-posicao">${numPosicao}</div>
-                        </div>
-                        <div class="card-info">
-                            <h2 class="card-nome">${cand.nome}</h2>
-                            <span class="partido-tag">${cand.partido} | nº ${cand.numero}</span>
-                            <div class="selos-container">
-                                ${htmlSelo}
-                                ${htmlHora}
+                        <div class="topo-card">
+                            <div class="foto-container">
+                                <img src="${urlFoto}" class="foto-candidato" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
+                                <div class="posicao-badge">${numPosicao}</div>
+                            </div>
+                            <div class="dados-identificacao">
+                                <h2 class="nome-candidato">${cand.nome}</h2>
+                                <span class="partido-tag">${cand.partido} | nº ${cand.numero}</span>
+                                <div class="selos-container">
+                                    ${htmlSelo}
+                                    ${htmlHora}
+                                </div>
                             </div>
                         </div>
-                        <div class="card-votos">
-                            <div class="card-pct">${votosPct}%</div>
-                            <div class="card-num-votos">${parseInt(votosQtd).toLocaleString('pt-BR')} votos</div>
-                        </div>
-                        <div class="barra-wrap">
-                            <div class="barra-fill" style="width: ${String(votosPct).replace(',', '.')}%"></div>
+                        <div class="votos-container">
+                            <div class="votos-valores">
+                                <span class="porcentagem-votos">${votosPct}%</span>
+                                <span class="absoluto-votos">${parseInt(votosQtd).toLocaleString('pt-BR')} votos</span>
+                            </div>
+                            <div class="barra-candidato-wrap">
+                                <div class="barra-candidato-preenchimento" style="width: ${String(votosPct).replace(',', '.')}%"></div>
+                            </div>
                         </div>
                     </article>
                 `;
@@ -503,23 +480,21 @@
             container.innerHTML = acumularHTML;
         }
 
-        function renderizarListaLegislativa(candidatos) {
-            const container = cargoAtivo === "0006" ? document.getElementById("lista-candidatos-federais") : document.getElementById("lista-candidatos-estaduais");
-            container.innerHTML = "";
+        function renderizarListaLegislativa(candidatos, tabelaID) {
+            const tabelaCorpo = document.getElementById(tabelaID);
+            tabelaCorpo.innerHTML = "";
 
             if (candidatos.length === 0) {
-                container.innerHTML = "<div class='estado-mensagem'>Aguardando dados numéricos para este cargo.</div>";
+                tabelaCorpo.innerHTML = "<tr><td colspan='3' class='estado-mensagem'>Aguardando dados numéricos.</td></tr>";
                 return;
             }
 
             let acumularHTML = "";
 
-            candidatos.forEach((cand, indice) => {
-                const numPosicao = indice + 1;
-                let htmlSelo = "";
-
+            candidatos.forEach(cand => {
+                let txtSeloLegislativo = "";
                 if (cand.eleito === "E") {
-                    htmlSelo = " <span style='color: var(--verde-eleito); font-weight: bold; font-size: 0.8rem;'>[ELEITO]</span>";
+                    txtSeloLegislativo = " <span style='color: var(--verde-eleito); font-weight: bold; font-size: 0.8rem;'>[ELEITO]</span>";
                 }
 
                 const urlFoto = cand.foto || "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/pe/" + (cand.sqcand || cand.numero) + ".jpeg";
@@ -527,29 +502,35 @@
                 const votosPct = cand.votos ? cand.votos.porcentagem : (cand.porcentagem || "0,00");
 
                 acumularHTML += `
-                    <article class="card-candidato">
-                        <div class="card-foto-wrap">
-                            <img src="${urlFoto}" class="card-foto" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
-                            <div class="card-posicao">${numPosicao}</div>
-                        </div>
-                        <div class="card-info">
-                            <h2 class="card-nome">${cand.nome}${htmlSelo}</h2>
-                            <span class="partido-tag">${cand.partido} | nº ${cand.numero}</span>
-                        </div>
-                        <div class="card-votos">
-                            <div class="card-pct">${votosPct}%</div>
-                            <div class="card-num-votos">${parseInt(votosQtd).toLocaleString('pt-BR')} v.</div>
-                        </div>
-                        <div class="barra-wrap">
-                            <div class="barra-fill" style="width: ${String(votosPct).replace(',', '.')}%"></div>
-                        </div>
-                    </article>
+                    <tr class="linha-candidato">
+                        <td>
+                            <div class="celula-perfil">
+                                <img src="${urlFoto}" class="foto-compacta" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
+                                <div>
+                                    <div class="nome-compacto">${cand.nome}${txtSeloLegislativo}</div>
+                                    <div style="font-size: 0.8rem; color: var(--texto-suave);">nº ${cand.numero}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="font-family: var(--fonte-display); font-weight: 700; color: var(--texto-suave);">
+                            ${cand.partido}
+                        </td>
+                        <td class="celula-valores">
+                            <div class="pct-compacta">${votosPct}%</div>
+                            <div class="abs-compacta">${parseInt(votosQtd).toLocaleString('pt-BR')} v.</div>
+                        </td>
+                    </tr>
                 `;
             });
-            container.innerHTML = acumularHTML;
+            tabelaCorpo.innerHTML = acumularHTML;
         }
 
-        // Inicialização automática
+        function ocultarLoading() {
+            const loader = document.getElementById("container-loading");
+            if (loader) loader.style.display = "none";
+        }
+
+        // Início automático focando no cargo de Governador (0003)
         buscarDadosDoWorker();
         temporizadorAtualizacao = setInterval(buscarDadosDoWorker, 60000);
     </script>
