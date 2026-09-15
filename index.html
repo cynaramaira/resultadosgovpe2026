@@ -154,11 +154,11 @@
             width: 0%;
         }
 
-        /* 4 Abas no Grid */
+        /* 5 Abas no Grid para caber Presidente, Governador, Senador e Deputados */
         .abas-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
             margin-bottom: 24px;
         }
 
@@ -167,9 +167,9 @@
             border: 1px solid var(--borda);
             color: var(--texto-suave);
             font-family: var(--fonte-display);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            padding: 12px 6px;
+            padding: 12px 4px;
             border-radius: 12px;
             cursor: pointer;
             text-transform: uppercase;
@@ -262,7 +262,7 @@
 
         footer { text-align: center; padding: 30px 20px; font-size: 0.75rem; color: var(--texto-suave); border-top: 1px solid var(--borda); margin-top: 60px; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 650px) {
             .abas-container { grid-template-columns: repeat(2, 1fr); }
             .totalizacao-wrapper { grid-template-columns: 1fr; gap: 12px; }
             .tot-divider { display: none; }
@@ -297,9 +297,10 @@
             </div>
         </section>
 
-        <!-- 4 Abas Atualizadas (Governador = 0003, Senador = 0005, Federal = 0006, Estadual = 0007) -->
+        <!-- 5 Abas: Presidente (0001), Governador (0003), Senador (0005), Dep. Federal (0006), Dep. Estadual (0007) -->
         <nav class="abas-container">
-            <button class="aba-btn ativa" onclick="alternarAba('0003')">Governador</button>
+            <button class="aba-btn ativa" onclick="alternarAba('0001')">Presidente</button>
+            <button class="aba-btn" onclick="alternarAba('0003')">Governador</button>
             <button class="aba-btn" onclick="alternarAba('0005')">Senador</button>
             <button class="aba-btn" onclick="alternarAba('0006')">Dep. Federal</button>
             <button class="aba-btn" onclick="alternarAba('0007')">Dep. Estadual</button>
@@ -309,8 +310,12 @@
             <div class="texto-mensagem">Consultando servidor do simulado...</div>
         </div>
 
-        <!-- Painéis de Conteúdo para cada cargo -->
-        <section id="painel-0003" class="conteudo-painel ativo">
+        <!-- Painéis de Conteúdo para os 5 cargos -->
+        <section id="painel-0001" class="conteudo-painel ativo">
+            <div class="grid-cards" id="lista-presidente"></div>
+        </section>
+
+        <section id="painel-0003" class="conteudo-painel">
             <div class="grid-cards" id="lista-governador"></div>
         </section>
 
@@ -351,7 +356,7 @@
 
     <script>
         const WORKER_BASE_URL = "https://tse-proxy-2026.cynaramaira.workers.dev/";
-        let cargoAtivo = "0003"; // Começa em Governador
+        let cargoAtivo = "0001"; // Começa em Presidente
         let temporizadorAtualizacao = null;
         const memoriaHistoricoResultados = {};
 
@@ -364,7 +369,7 @@
             cargoAtivo = codigoCargo;
             
             document.querySelectorAll(".aba-btn").forEach((btn, index) => {
-                const listaCargos = ["0003", "0005", "0006", "0007"];
+                const listaCargos = ["0001", "0003", "0005", "0006", "0007"];
                 if (listaCargos[index] === codigoCargo) {
                     btn.classList.add("ativa");
                 } else {
@@ -409,8 +414,11 @@
 
             ocultarLoading();
 
-            if (cargoAtivo === "0003" || cargoAtivo === "0005") {
-                renderizarCardsMajoritarios(listaCandidatos, cargoAtivo === "0003" ? "lista-governador" : "lista-senador");
+            if (cargoAtivo === "0001" || cargoAtivo === "0003" || cargoAtivo === "0005") {
+                let idContainer = "lista-presidente";
+                if (cargoAtivo === "0003") idContainer = "lista-governador";
+                if (cargoAtivo === "0005") idContainer = "lista-senador";
+                renderizarCardsMajoritarios(listaCandidatos, idContainer);
             } else {
                 renderizarListaLegislativa(listaCandidatos, cargoAtivo === "0006" ? "lista-federais" : "lista-estaduais");
             }
@@ -445,7 +453,8 @@
                     htmlHora = "<span class='hora-eleito'>Registrado às " + memoriaHistoricoResultados[cand.numero] + "</span>";
                 }
 
-                const urlFoto = cand.foto || "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/pe/" + (cand.sqcand || cand.numero) + ".jpeg";
+                const pastaFoto = cargoAtivo === "0001" ? "br" : "pe";
+                const urlFoto = cand.foto || "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/" + pastaFoto + "/" + (cand.sqcand || cand.numero) + ".jpeg";
                 const votosQtd = cand.votos ? cand.votos.quantidade : (cand.votosAbsolutos || 0);
                 const votosPct = cand.votos ? cand.votos.porcentagem : (cand.porcentagem || "0,00");
 
@@ -530,7 +539,7 @@
             if (loader) loader.style.display = "none";
         }
 
-        // Início automático focando no cargo de Governador (0003)
+        // Início automático focado na aba de Presidente (0001)
         buscarDadosDoWorker();
         temporizadorAtualizacao = setInterval(buscarDadosDoWorker, 60000);
     </script>
