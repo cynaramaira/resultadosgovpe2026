@@ -403,16 +403,54 @@
         }
 
         function processarEExibir(dados) {
-            const horarioTSE = dados.dataHora || "00:00:00";
+            const horarioTSE = dados.dataHora || dados.hg || "00:00:00";
             document.getElementById("horario-tse").textContent = horarioTSE;
 
-            const progressoTexto = dados.andamento || "0,00";
+            const progressoTexto = dados.andamento || (dados.s ? dados.s.pst : "0,00");
             document.getElementById("percentual-totalizado").textContent = progressoTexto + "%";
-            document.getElementById("barra-totalizacao-fill").style.width = progressoTexto.replace(",", ".") + "%";
-
-            const listaCandidatos = dados.cand || dados.candidatos || [];
+            document.getElementById("barra-totalizacao-fill").style.width = String(progressoTexto).replace(",", ".") + "%";
 
             ocultarLoading();
+
+            // Varredura profunda na árvore do JSON do TSE (suporta raiz, carg, agr e par)
+            let listaCandidatos = [];
+            let dadosCargo = null;
+
+            if (dados.carg && Array.isArray(dados.carg)) {
+                dadosCargo = dados.carg.find(c => c.cd === cargoAtivo);
+            } else if (dados.carg) {
+                dadosCargo = dados.carg;
+            } else {
+                dadosCargo = dados;
+            }
+
+            if (dadosCargo) {
+                // 1. Se os candidatos estiverem diretos
+                if (dadosCargo.cand) {
+                    const candidatosBrutos = Array.isArray(dadosCargo.cand) ? dadosCargo.cand : Object.values(dadosCargo.cand);
+                    candidatosBrutos.forEach(c => listaCandidatos.push(normalizarCandidato(c)));
+                } 
+                // 2. Se os candidatos estiverem agrupados por coligações (agr) ou partidos (par)
+                if (dadosCargo.agr) {
+                    dadosCargo.agr.forEach(coligacao => {
+                        if (coligacao.cand) {
+                            const candColigacao = Array.isArray(coligacao.cand) ? coligacao.cand : Object.values(coligacao.cand);
+                            candColigacao.forEach(c => listaCandidatos.push(normalizarCandidato(c, coligacao.sg)));
+                        }
+                        if (coligacao.par) {
+                            coligacao.par.forEach(partido => {
+                                if (partido.cand) {
+                                    const candPartido = Array.isArray(partido.cand) ? partido.cand : Object.values(partido.cand);
+                                    candPartido.forEach(c => listaCandidatos.push(normalizarCandidato(c, partido.sg)));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+
+            // Ordena da maior votação para a menor
+            listaCandidatos.sort((a, b) => b.votos.quantidade - a.votos.quantidade);
 
             if (cargoAtivo === "0001" || cargoAtivo === "0003" || cargoAtivo === "0005") {
                 let idContainer = "lista-presidente";
@@ -423,10 +461,46 @@
                 renderizarListaLegislativa(listaCandidatos, cargoAtivo === "0006" ? "lista-federais" : "lista-estaduais");
             }
 
-            if (progressoTexto.replace(",", ".") === "100.00") {
+            if (String(progressoTexto).replace(",", ".") === "100.00") {
                 clearInterval(temporizadorAtualizacao);
-                document.getElementById("status-apuracao-texto").textContent = "Apuração Concluída";
             }
+        }
+
+        function normalizarCandidato(cand, partidoPadrao) {
+            const numeroUrna = cand.n || cand.numero || "00";
+            const nomeCandidato = cand.nm || cand.nome || "Candidato " + numeroUrna;
+            
+            let siglaPartido = partidoPadrao || "PARTIDO";
+            if (cand.cc) {
+                siglaPartido = cand.cc.split(" ")[0] || siglaPartido;
+            } else if (cand.P) {
+                siglaPartido = cand.P;
+            }
+
+            const votosQtd = parseInt(cand.vap || (cand.votos ? cand.votos.quantidade : 0)) || 0;
+            const votosPct = cand.pvap || (cand.votos ? cand.votos.porcentagem : "0,00");
+            
+            let statusEleito = "N";
+            const situacao = (cand.st || cand.e || "").toLowerCase();
+            if (situacao.includes("eleito") || cand.e === "S" || cand.e === "s") {
+                statusEleito = "E";
+            }
+
+            const sequencial = cand.sqcand || cand.seq || numeroUrna;
+            const pastaAbrangencia = cargoAtivo === "0001" ? "br" : "pe";
+            const linkFoto = `https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/${pastaAbrangencia}/${sequencial}.jpeg`;
+
+            return {
+                nome: nomeCandidato,
+                numero: numeroUrna,
+                partido: siglaPartido,
+                eleito: statusEleito,
+                foto: linkFoto,
+                votos: {
+                    quantidade: votosQtd,
+                    porcentagem: votosPct
+                }
+            };
         }
 
         function renderizarCardsMajoritarios(candidatos, containerID) {
