@@ -154,7 +154,6 @@
             width: 0%;
         }
 
-        /* 5 Abas no Grid para caber Presidente, Governador, Senador e Deputados */
         .abas-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -239,7 +238,6 @@
         .barra-candidato-preenchimento { height: 100%; width: 0%; background: var(--azul); transition: width 1s ease; }
         .card-candidato:nth-child(odd) .barra-candidato-preenchimento { background: var(--laranja); }
 
-        /* Tabela para parlamentares */
         .tabela-legislativo { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
         .tabela-legislativo th { font-family: var(--fonte-display); text-transform: uppercase; font-size: 0.85rem; color: var(--texto-suave); padding: 10px 16px; text-align: left; }
         .tabela-legislativo th.dir { text-align: right; }
@@ -297,7 +295,6 @@
             </div>
         </section>
 
-        <!-- 5 Abas: Presidente (0001), Governador (0003), Senador (0005), Dep. Federal (0006), Dep. Estadual (0007) -->
         <nav class="abas-container">
             <button class="aba-btn ativa" onclick="alternarAba('0001')">Presidente</button>
             <button class="aba-btn" onclick="alternarAba('0003')">Governador</button>
@@ -310,7 +307,6 @@
             <div class="texto-mensagem">Consultando servidor do simulado...</div>
         </div>
 
-        <!-- Painéis de Conteúdo para os 5 cargos -->
         <section id="painel-0001" class="conteudo-painel ativo">
             <div class="grid-cards" id="lista-presidente"></div>
         </section>
@@ -351,18 +347,18 @@
     </main>
 
     <footer>
-        <p>Portal jamildo.com — Cobertura Especial das Eleições 2026.</p>
+        <p>Portal jamildo.com. Cobertura Especial das Eleições 2026.</p>
     </footer>
 
     <script>
         const WORKER_BASE_URL = "https://tse-proxy-2026.cynaramaira.workers.dev/";
-        let cargoAtivo = "0001"; // Começa em Presidente
+        let cargoAtivo = "0001";
         let temporizadorAtualizacao = null;
         const memoriaHistoricoResultados = {};
 
         function tratarFalhaImagem(img) {
             img.onerror = null;
-            img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23111827'/><text x='50%25' y='55%25' font-family='sans-serif' font-size='14' fill='%238892a4' text-anchor='middle'>FOTO</text></svg>";
+            img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%238892a4'><circle cx='12' cy='8' r='4'/><path d='M12 14c-5 0-8 2.5-8 5v1h16v-1c0-2.5-3-5-8-5z'/></svg>";
         }
 
         function alternarAba(codigoCargo) {
@@ -382,6 +378,9 @@
             });
             document.getElementById("painel-" + codigoCargo).classList.add("ativo");
 
+            const loader = document.getElementById("container-loading");
+            if (loader) loader.style.display = "block";
+
             buscarDadosDoWorker();
         }
 
@@ -398,7 +397,7 @@
                 processarEExibir(dadosJSON);
             } catch (erro) {
                 console.error("Falha na requisição:", erro);
-                document.getElementById("status-apuracao-texto").textContent = "Aguardando conexão...";
+                ocultarLoading();
             }
         }
 
@@ -412,7 +411,6 @@
 
             ocultarLoading();
 
-            // Pega diretamente a lista limpa que o Worker preparou
             const listaCandidatos = dados.candidatos || [];
 
             if (cargoAtivo === "0001" || cargoAtivo === "0003" || cargoAtivo === "0005") {
@@ -427,59 +425,6 @@
             if (String(progressoTexto).replace(",", ".") === "100.00") {
                 clearInterval(temporizadorAtualizacao);
             }
-        }
-            // Ordena da maior votação para a menor
-            listaCandidatos.sort((a, b) => b.votos.quantidade - a.votos.quantidade);
-
-            if (cargoAtivo === "0001" || cargoAtivo === "0003" || cargoAtivo === "0005") {
-                let idContainer = "lista-presidente";
-                if (cargoAtivo === "0003") idContainer = "lista-governador";
-                if (cargoAtivo === "0005") idContainer = "lista-senador";
-                renderizarCardsMajoritarios(listaCandidatos, idContainer);
-            } else {
-                renderizarListaLegislativa(listaCandidatos, cargoAtivo === "0006" ? "lista-federais" : "lista-estaduais");
-            }
-
-            if (String(progressoTexto).replace(",", ".") === "100.00") {
-                clearInterval(temporizadorAtualizacao);
-            }
-        }
-
-        function normalizarCandidato(cand, partidoPadrao) {
-            const numeroUrna = cand.n || cand.numero || "00";
-            const nomeCandidato = cand.nm || cand.nome || "Candidato " + numeroUrna;
-            
-            let siglaPartido = partidoPadrao || "PARTIDO";
-            if (cand.cc) {
-                siglaPartido = cand.cc.split(" ")[0] || siglaPartido;
-            } else if (cand.P) {
-                siglaPartido = cand.P;
-            }
-
-            const votosQtd = parseInt(cand.vap || (cand.votos ? cand.votos.quantidade : 0)) || 0;
-            const votosPct = cand.pvap || (cand.votos ? cand.votos.porcentagem : "0,00");
-            
-            let statusEleito = "N";
-            const situacao = (cand.st || cand.e || "").toLowerCase();
-            if (situacao.includes("eleito") || cand.e === "S" || cand.e === "s") {
-                statusEleito = "E";
-            }
-
-            const sequencial = cand.sqcand || cand.seq || numeroUrna;
-            const pastaAbrangencia = cargoAtivo === "0001" ? "br" : "pe";
-            const linkFoto = `https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/${pastaAbrangencia}/${sequencial}.jpeg`;
-
-            return {
-                nome: nomeCandidato,
-                numero: numeroUrna,
-                partido: siglaPartido,
-                eleito: statusEleito,
-                foto: linkFoto,
-                votos: {
-                    quantidade: votosQtd,
-                    porcentagem: votosPct
-                }
-            };
         }
 
         function renderizarCardsMajoritarios(candidatos, containerID) {
@@ -506,10 +451,9 @@
                     htmlHora = "<span class='hora-eleito'>Registrado às " + memoriaHistoricoResultados[cand.numero] + "</span>";
                 }
 
-                const pastaFoto = cargoAtivo === "0001" ? "br" : "pe";
-                const urlFoto = cand.foto || "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/" + pastaFoto + "/" + (cand.sqcand || cand.numero) + ".jpeg";
-                const votosQtd = cand.votos ? cand.votos.quantidade : (cand.votosAbsolutos || 0);
-                const votosPct = cand.votos ? cand.votos.porcentagem : (cand.porcentagem || "0,00");
+                const urlFoto = cand.foto || "";
+                const votosQtd = cand.votos ? cand.votos.quantidade : 0;
+                const votosPct = cand.votos ? cand.votos.porcentagem : "0,00";
 
                 acumularHTML += `
                     <article class="card-candidato">
@@ -559,9 +503,9 @@
                     txtSeloLegislativo = " <span style='color: var(--verde-eleito); font-weight: bold; font-size: 0.8rem;'>[ELEITO]</span>";
                 }
 
-                const urlFoto = cand.foto || "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/pe/" + (cand.sqcand || cand.numero) + ".jpeg";
-                const votosQtd = cand.votos ? cand.votos.quantidade : (cand.votosAbsolutos || 0);
-                const votosPct = cand.votos ? cand.votos.porcentagem : (cand.porcentagem || "0,00");
+                const urlFoto = cand.foto || "";
+                const votosQtd = cand.votos ? cand.votos.quantidade : 0;
+                const votosPct = cand.votos ? cand.votos.porcentagem : "0,00";
 
                 acumularHTML += `
                     <tr class="linha-candidato">
@@ -592,7 +536,6 @@
             if (loader) loader.style.display = "none";
         }
 
-        // Início automático focado na aba de Presidente (0001)
         buscarDadosDoWorker();
         temporizadorAtualizacao = setInterval(buscarDadosDoWorker, 60000);
     </script>
