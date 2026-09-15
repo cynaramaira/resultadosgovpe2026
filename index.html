@@ -371,8 +371,8 @@
     </footer>
 
     <script>
-        const WORKER_BASE_URL = "https://tse-2022-teste.cynaramaira.workers.dev/";
-        let cargoAtivo = "0005";
+        const WORKER_BASE_URL = "https://tse-proxy-2026.cynaramaira.workers.dev/";
+        let cargoAtivo = "0005"; // Começa em Senador (0005)
         let temporizadorAtualizacao = null;
         const memoriaHistoricoResultados = {};
 
@@ -393,163 +393,63 @@
                 }
             });
 
-            document.querySelectorAll(".conteudo-painel").forEach(painel => {
-                if (painel.id === "painel-" + (codigoCargo === "0005" ? "senador" : (codigoCargo === "0006" ? "deputado-federal" : "deputado-estadual"))) {
-                    painel.classList.add("ativo");
-                } else {
-                    painel.classList.remove("ativo");
-                }
-            });
+            // Gerencia visibilidade das seções com base no código do cargo
+            document.getElementById("painel-0005").classList.toggle("ativo", codigoCargo === "0005");
+            document.getElementById("painel-0006").classList.toggle("ativo", codigoCargo === "0006");
+            document.getElementById("painel-0007").classList.toggle("ativo", codigoCargo === "0007");
 
-            // Ajuste dinâmico do ID do painel ativo
-            if(codigoCargo === "0005") {
-                document.getElementById("painel-0005").classList.add("ativo");
-                document.getElementById("painel-0006").classList.remove("ativo");
-                document.getElementById("painel-0007").classList.remove("ativo");
-            } else if(codigoCargo === "0006") {
-                document.getElementById("painel-0005").classList.remove("ativo");
-                document.getElementById("painel-0006").classList.add("ativo");
-                document.getElementById("painel-0007").classList.remove("ativo");
-            } else {
-                document.getElementById("painel-0005").classList.remove("ativo");
-                document.getElementById("painel-0006").classList.remove("ativo");
-                document.getElementById("painel-0007").classList.add("ativo");
-            }
-
-            buscarDadosSimulado();
+            buscarDadosDoWorker();
         }
 
-        async function buscarDadosSimulado() {
+        // Função corrigida para chamar o Worker passando o cargo correto na URL
+        async function buscarDadosDoWorker() {
             const urlCompleta = WORKER_BASE_URL + "?cargo=" + cargoAtivo;
 
             try {
                 const resposta = await fetch(urlCompleta);
                 if (!resposta.ok) {
-                    throw new Error("Erro de comunicação com o simulado.");
+                    throw new Error("Erro de comunicação com o Worker.");
                 }
 
                 const dadosJSON = await resposta.json();
                 processarEExibir(dadosJSON);
             } catch (erro) {
-                console.error("Falha no fetch:", erro);
-                document.getElementById("container-loading").innerHTML = "Aguardando liberação da base de dados pelo TSE...";
+                console.error("Falha na requisição:", erro);
+                document.getElementById("status-apuracao-texto").textContent = "Aguardando conexão...";
             }
         }
 
         function processarEExibir(dados) {
-            // Horário oficial direto do servidor do TSE (campos hg ou ht)
-            const horaOficialTSE = dados.ht || (dados.hg || "00:00:00");
-            document.getElementById("horario-tse").textContent = horaOficialTSE;
+            // Atualiza o horário oficial vindo do Worker
+            const horarioTSE = dados.dataHora || "00:00:00";
+            document.getElementById("horario-tse").textContent = horarioTSE;
 
-            // Percentual de seções totalizadas (pst)
-            let percentualStr = "0,00";
-            if (dados.s && dados.s.pst) {
-                percentualStr = dados.s.pst;
-            } else if (dados.pst) {
-                percentualStr = dados.pst;
-            }
-            document.getElementById("percentual-totalizado").textContent = percentualStr + "%";
-            document.getElementById("barra-totalizacao-fill").style.width = percentualStr.replace(",", ".") + "%";
+            // Atualiza a porcentagem de apuração e a barra de progresso
+            const progressoTexto = dados.andamento || "0,00";
+            document.getElementById("percentual-totalizado").textContent = progressoTexto + "%";
+            document.getElementById("barra-totalizacao-fill").style.width = progressoTexto.replace(",", ".") + "%";
 
-            // Localiza o bloco do cargo ativo no JSON unificado
-            let dadosCargo = null;
-            if (dados.carg && Array.isArray(dados.carg)) {
-                dadosCargo = dados.carg.find(c => c.cd === cargoAtivo);
-            } else if (dados.carg) {
-                dadosCargo = dados.carg;
+            // Seções apuradas
+            const secoesTotalizadas = dados.secoesTotalizadas || "0";
+            const secoesTotais = dados.secoes || "0";
+            document.getElementById("secoes-totalizadas").textContent = secoesTotalizadas + " / " + secoesTotais;
+
+            const listaCandidatos = dados.cand || dados.candidatos || [];
+
+            if (cargoAtivo === "0005") {
+                renderizarCardsMajoritarios(listaCandidatos);
             } else {
-                dadosCargo = dados;
+                renderizarListaLegislativa(listaCandidatos);
             }
 
-            let listaCandidatos = [];
-
-            // Varredura segura na árvore unificada do TSE
-            if (dadosCargo && dadosCargo.cand) {
-                const arrCand = Object.values(dadosCargo.cand);
-                arrCand.forEach(cand => {
-                    listaCandidatos.push(estruturarCandidato(cand, horaOficialTSE));
-                });
-            } else if (dadosCargo && dadosCargo.agr) {
-                dadosCargo.agr.forEach(coligacao => {
-                    if (coligacao.cand) {
-                        Object.values(coligacao.cand).forEach(cand => {
-                            listaCandidatos.push(estruturarCandidato(cand, horaOficialTSE, coligacao.sg));
-                        });
-                    }
-                    if (coligacao.par) {
-                        coligacao.par.forEach(partido => {
-                            if (partido.cand) {
-                                Object.values(partido.cand).forEach(cand => {
-                                    listaCandidatos.push(estruturarCandidato(cand, horaOficialTSE, partido.sg));
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-
-            // Ordena do mais votado para o menos votado
-            listaCandidatos.sort((a, b) => b.votosAbsolutos - a.votosAbsolutos);
-
-            document.getElementById("container-loading").style.display = "none";
-            renderizarInterface(listaCandidatos);
-
-            if (percentualStr.replace(",", ".") === "100.00") {
+            if (progressoTexto.replace(",", ".") === "100.00") {
                 clearInterval(temporizadorAtualizacao);
                 document.getElementById("status-apuracao-texto").textContent = "Apuração Concluída";
             }
         }
 
-        function estruturarCandidato(cand, horaOficialTSE, partidoPadrao) {
-            const numeroUrna = cand.n || "00";
-            const idSequencial = cand.sqcand || cand.seq || "";
-            const nomeCandidato = cand.nm || "Candidato " + numeroUrna;
-            
-            let partidoSigla = partidoPadrao || "PARTIDO";
-            if (cand.cc) {
-                partidoSigla = cand.cc.split(" ")[0] || partidoSigla;
-            }
-
-            const votosValores = parseInt(cand.vap) || 0;
-            const pctValores = cand.pvap || "0,00";
-
-            let situacao = "";
-            if (cand.st) {
-                situacao = cand.st.toLowerCase().trim();
-            } else if (cand.e) {
-                situacao = cand.e.toLowerCase().trim();
-            }
-
-            let statusFormatado = "";
-            if (situacao.includes("eleito") || cand.e === "s" || cand.e === "S") {
-                statusFormatado = "eleito";
-                if (!memoriaHistoricoResultados[idSequencial]) {
-                    memoriaHistoricoResultados[idSequencial] = horaOficialTSE;
-                }
-            }
-
-            // URL oficial da foto do candidato no servidor do TSE
-            const urlFotoCandidato = "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/pe/" + idSequencial + ".jpeg";
-
-            return {
-                id: idSequencial,
-                numero: numeroUrna,
-                nome: nomeCandidato,
-                partido: partidoSigla,
-                votosAbsolutos: votosValores,
-                porcentagem: pctValores,
-                status: statusFormatado,
-                foto: urlFotoCandidato
-            };
-        }
-
-        function renderizarInterface(candidatos) {
-            let containerAlvoID = "lista-senadores";
-            if (cargoAtivo === "0006") containerAlvoID = "lista-candidatos-federais";
-            if (cargoAtivo === "0007") containerAlvoID = "lista-candidatos-estaduais";
-
-            // Se for federal ou estadual, redireciona o renderizador para as respectivas seções se necessário
-            let container = document.getElementById(cargoAtivo === "0005" ? "lista-senadores" : (cargoAtivo === "0006" ? "lista-candidatos-federais" : "lista-candidatos-estaduais"));
+        function renderizarCardsMajoritarios(candidatos) {
+            const container = document.getElementById("lista-candidatos");
             container.innerHTML = "";
 
             if (candidatos.length === 0) {
@@ -560,21 +460,27 @@
             let acumularHTML = "";
 
             candidatos.forEach((cand, indice) => {
-                const posicao = indice + 1;
+                const numPosicao = indice + 1;
                 let htmlSelo = "";
                 let htmlHora = "";
 
-                if (cand.status === "eleito") {
+                if (cand.eleito === "E") {
                     htmlSelo = "<span class='selo-status eleito'>Eleito</span>";
-                    const horarioGravado = memoriaHistoricoResultados[cand.id] || "Confirmado";
-                    htmlHora = "<span class='hora-eleito'>Registrado às " + horarioGravada + "</span>";
+                    if (!memoriaHistoricoResultados[cand.numero]) {
+                        memoriaHistoricoResultados[cand.numero] = document.getElementById("horario-tse").textContent;
+                    }
+                    htmlHora = "<span class='hora-eleito'>Registrado às " + memoriaHistoricoResultados[cand.numero] + "</span>";
                 }
+
+                const urlFoto = cand.foto || "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/pe/" + (cand.sqcand || cand.numero) + ".jpeg";
+                const votosQtd = cand.votos ? cand.votos.quantidade : (cand.votosAbsolutos || 0);
+                const votosPct = cand.votos ? cand.votos.porcentagem : (cand.porcentagem || "0,00");
 
                 acumularHTML += `
                     <article class="card-candidato">
                         <div class="card-foto-wrap">
-                            <img src="${cand.foto}" class="card-foto" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
-                            <div class="card-posicao">${posicao}</div>
+                            <img src="${urlFoto}" class="card-foto" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
+                            <div class="card-posicao">${numPosicao}</div>
                         </div>
                         <div class="card-info">
                             <h2 class="card-nome">${cand.nome}</h2>
@@ -585,11 +491,11 @@
                             </div>
                         </div>
                         <div class="card-votos">
-                            <div class="card-pct">${cand.porcentagem}%</div>
-                            <div class="card-num-votos">${cand.votosAbsolutos.toLocaleString('pt-BR')} votos</div>
+                            <div class="card-pct">${votosPct}%</div>
+                            <div class="card-num-votos">${parseInt(votosQtd).toLocaleString('pt-BR')} votos</div>
                         </div>
                         <div class="barra-wrap">
-                            <div class="barra-fill" style="width: ${cand.porcentagem.replace(',', '.')}%"></div>
+                            <div class="barra-fill" style="width: ${String(votosPct).replace(',', '.')}%"></div>
                         </div>
                     </article>
                 `;
@@ -597,9 +503,55 @@
             container.innerHTML = acumularHTML;
         }
 
-        // Inicialização e Temporizador de 60 segundos respeitando as normas do TSE
-        buscarDadosSimulado();
-        temporizadorAtualizacao = setInterval(buscarDadosSimulado, 60000);
+        function renderizarListaLegislativa(candidatos) {
+            const container = cargoAtivo === "0006" ? document.getElementById("lista-candidatos-federais") : document.getElementById("lista-candidatos-estaduais");
+            container.innerHTML = "";
+
+            if (candidatos.length === 0) {
+                container.innerHTML = "<div class='estado-mensagem'>Aguardando dados numéricos para este cargo.</div>";
+                return;
+            }
+
+            let acumularHTML = "";
+
+            candidatos.forEach((cand, indice) => {
+                const numPosicao = indice + 1;
+                let htmlSelo = "";
+
+                if (cand.eleito === "E") {
+                    htmlSelo = " <span style='color: var(--verde-eleito); font-weight: bold; font-size: 0.8rem;'>[ELEITO]</span>";
+                }
+
+                const urlFoto = cand.foto || "https://resultados-sim.tse.jus.br/simulado/simulado2026/ele2026/arquivos-comuns/fotos/pe/" + (cand.sqcand || cand.numero) + ".jpeg";
+                const votosQtd = cand.votos ? cand.votos.quantidade : (cand.votosAbsolutos || 0);
+                const votosPct = cand.votos ? cand.votos.porcentagem : (cand.porcentagem || "0,00");
+
+                acumularHTML += `
+                    <article class="card-candidato">
+                        <div class="card-foto-wrap">
+                            <img src="${urlFoto}" class="card-foto" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
+                            <div class="card-posicao">${numPosicao}</div>
+                        </div>
+                        <div class="card-info">
+                            <h2 class="card-nome">${cand.nome}${htmlSelo}</h2>
+                            <span class="partido-tag">${cand.partido} | nº ${cand.numero}</span>
+                        </div>
+                        <div class="card-votos">
+                            <div class="card-pct">${votosPct}%</div>
+                            <div class="card-num-votos">${parseInt(votosQtd).toLocaleString('pt-BR')} v.</div>
+                        </div>
+                        <div class="barra-wrap">
+                            <div class="barra-fill" style="width: ${String(votosPct).replace(',', '.')}%"></div>
+                        </div>
+                    </article>
+                `;
+            });
+            container.innerHTML = acumularHTML;
+        }
+
+        // Inicialização automática
+        buscarDadosDoWorker();
+        temporizadorAtualizacao = setInterval(buscarDadosDoWorker, 60000);
     </script>
 </body>
 </html>
