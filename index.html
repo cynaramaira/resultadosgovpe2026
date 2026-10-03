@@ -206,7 +206,18 @@
 
         .topo-card { display: flex; align-items: center; gap: 15px; }
         .foto-container { position: relative; width: 68px; height: 68px; flex-shrink: 0; }
-        .foto-candidato { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--escuro-3); border: 2px solid var(--borda); }
+        
+        /* Borda branca com contraste para a foto principal */
+        .foto-candidato { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            background: var(--escuro-3); 
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        }
+        
         .posicao-badge {
             position: absolute; bottom: 0; right: 0; width: 22px; height: 22px;
             border-radius: 50%; background: var(--azul); color: #fff;
@@ -248,7 +259,18 @@
         .linha-candidato td:first-child { border-left: 1px solid var(--borda); border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
         .linha-candidato td:last-child { border-right: 1px solid var(--borda); border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
         .celula-perfil { display: flex; align-items: center; gap: 12px; }
-        .foto-compacta { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--escuro-3); border: 1px solid var(--borda); }
+        
+        /* Borda branca com contraste para a foto compacta da tabela */
+        .foto-compacta { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            background: var(--escuro-3); 
+            border: 2px solid rgba(255, 255, 255, 0.85); 
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        
         .nome-compacto { font-family: var(--fonte-display); font-size: 1rem; font-weight: 700; text-transform: uppercase; color: #fff; }
         .celula-valores { text-align: right; }
         .pct-compacta { font-family: var(--fonte-display); font-size: 1.3rem; font-weight: 700; color: #fff; }
@@ -277,7 +299,7 @@
         </div>
         <div class="badge-ao-vivo">
             <div class="dot"></div>
-            <span>Simulado TSE 2026</span>
+            <span>Eleições 2026</span>
         </div>
     </header>
 
@@ -306,7 +328,7 @@
         </nav>
 
         <div id="container-loading" class="estado-mensagem">
-            <div class="texto-mensagem">Consultando servidor do simulado...</div>
+            <div class="texto-mensagem">Consultando apuração oficial...</div>
         </div>
 
         <section id="painel-0001" class="conteudo-painel ativo">
@@ -457,6 +479,8 @@
                     htmlSelo = "<span class='selo-status segundo-turno'>2º Turno</span>";
                 }
 
+                // Prioridade obrigatória para o nome de urna
+                const nomeExibicao = cand.nomeUrna || cand.nmu || cand.nome || "";
                 const urlFoto = cand.foto || "";
                 const votosQtd = cand.votos ? cand.votos.quantidade : 0;
                 const votosPct = cand.votos ? cand.votos.porcentagem : "0,00";
@@ -465,11 +489,11 @@
                     <article class="card-candidato">
                         <div class="topo-card">
                             <div class="foto-container">
-                                <img src="${urlFoto}" class="foto-candidato" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
+                                <img src="${urlFoto}" class="foto-candidato" alt="${nomeExibicao}" onerror="tratarFalhaImagem(this)">
                                 <div class="posicao-badge">${numPosicao}</div>
                             </div>
                             <div class="dados-identificacao">
-                                <h2 class="nome-candidato">${cand.nome}</h2>
+                                <h2 class="nome-candidato">${nomeExibicao}</h2>
                                 <span class="partido-tag">${cand.partido} | nº ${cand.numero}</span>
                                 <div class="selos-container">
                                     ${htmlSelo}
@@ -513,6 +537,8 @@
                     txtSeloLegislativo = " <span style='color: var(--laranja); font-weight: bold; font-size: 0.8rem;'>[2º TURNO]</span>";
                 }
 
+                // Prioridade obrigatória para o nome de urna
+                const nomeExibicao = cand.nomeUrna || cand.nmu || cand.nome || "";
                 const urlFoto = cand.foto || "";
                 const votosQtd = cand.votos ? cand.votos.quantidade : 0;
                 const votosPct = cand.votos ? cand.votos.porcentagem : "0,00";
@@ -521,9 +547,9 @@
                     <tr class="linha-candidato">
                         <td>
                             <div class="celula-perfil">
-                                <img src="${urlFoto}" class="foto-compacta" alt="${cand.nome}" onerror="tratarFalhaImagem(this)">
+                                <img src="${urlFoto}" class="foto-compacta" alt="${nomeExibicao}" onerror="tratarFalhaImagem(this)">
                                 <div>
-                                    <div class="nome-compacto">${cand.nome}${txtSeloLegislativo}</div>
+                                    <div class="nome-compacto">${nomeExibicao}${txtSeloLegislativo}</div>
                                     <div style="font-size: 0.8rem; color: var(--texto-suave);">nº ${cand.numero}</div>
                                 </div>
                             </div>
