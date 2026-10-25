@@ -207,7 +207,6 @@
         .topo-card { display: flex; align-items: center; gap: 15px; }
         .foto-container { position: relative; width: 68px; height: 68px; flex-shrink: 0; }
         
-        /* Borda branca com contraste para a foto principal */
         .foto-candidato { 
             width: 100%; 
             height: 100%; 
@@ -260,7 +259,6 @@
         .linha-candidato td:last-child { border-right: 1px solid var(--borda); border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
         .celula-perfil { display: flex; align-items: center; gap: 12px; }
         
-        /* Borda branca com contraste para a foto compacta da tabela */
         .foto-compacta { 
             width: 40px; 
             height: 40px; 
@@ -375,7 +373,11 @@
     </footer>
 
     <script>
-        const WORKER_BASE_URL = "https://tse-proxy-2026.cynaramaira.workers.dev/";
+        const TSE_BASE = "https://resultados.tse.jus.br/oficial";
+        const CICLO = "ele2026";
+        const PLEITO_NACIONAL = "6257";
+        const PLEITO_ESTADUAL = "6259";
+        
         let cargoAtivo = "0001";
         let temporizadorAtualizacao = null;
         const memoriaHistoricoResultados = {};
@@ -405,45 +407,206 @@
             const loader = document.getElementById("container-loading");
             if (loader) loader.style.display = "block";
 
-            buscarDadosDoWorker();
+            carregarDadosTSE();
         }
 
-        async function buscarDadosDoWorker() {
-            const urlCompleta = WORKER_BASE_URL + "?cargo=" + cargoAtivo;
+        function decodificarJWS(textoBruto) {
+            if (!textoBruto.includes('.')) {
+                return JSON.parse(textoBruto);
+            }
+            const partes = textoBruto.split('.');
+            let payloadBase64 = partes[1].replace(/-/g, '+').replace(/_/g, '/');
+            while (payloadBase64.length % 4) {
+                payloadBase64 += '=';
+            }
+            const jsonDecodificado = decodeURIComponent(
+                atob(payloadBase64)
+                    .split('')
+                    .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join('')
+            );
+            return JSON.parse(jsonDecodificado);
+        }
+
+        async function carregarDadosTSE() {
+            const isPresidente = (cargoAtivo === "0001");
+            const pleito = isPresidente ? PLEITO_NACIONAL : PLEITO_ESTADUAL;
+            const uf = isPresidente ? "br" : "pe";
+            const sufixoEleicao = pleito.padStart(6, '0');
+            const nocache = Date.now();
+
+            const urlBase = `${TSE_BASE}/${CICLO}/${pleito}/dados/${uf}/${uf}-c${cargoAtivo}-e${sufixoEleicao}-u`;
 
             try {
-                const resposta = await fetch(urlCompleta);
-                if (!resposta.ok) {
-                    throw new Error("Erro de comunicação com o Worker.");
+                // Tenta prioritariamente o .jws oficial
+                const res = await fetch(`${urlBase}.jws?nocache=${nocache}`);
+                if (!res.ok) throw new Error("Status TSE: " + res.status);
+                const texto = await res.text();
+                const tseData = decodificarJWS(texto);
+                processarEExibir(tseData, pleito, uf);
+            } catch (err) {
+                console.warn("Tentando formato alternativo (.json):", err);
+                try {
+                    const resJson = await fetch(`${urlBase}.json?nocache=${nocache}`);
+                    if (resJson.ok) {
+                        const dados = await resJson.json();
+                        processarEExibir(dados, pleito, uf);
+                    } else {
+                        ocultarLoading();
+                    }
+                } catch (e2) {
+                    console.error("Falha ao consultar dados do TSE:", e2);
+                    ocultarLoading();
                 }
-
-                const dadosJSON = await resposta.json();
-                processarEExibir(dadosJSON);
-            } catch (erro) {
-                console.error("Falha na requisição:", erro);
-                ocultarLoading();
             }
         }
 
-        function processarEExibir(dados) {
-            const horarioTSE = dados.dataHora || "00:00:00";
+        function processarEExibir(tseData, pleito, uf) {
+            const horarioTSE = tseData.ht || (tseData.hg || "00:00:00");
             document.getElementById("horario-tse").textContent = horarioTSE;
 
-            const progressoTexto = dados.andamento || "0,00";
+            const progressoTexto = tseData.pst || (tseData.s ? tseData.s.pst : "0,00");
             document.getElementById("percentual-totalizado").textContent = progressoTexto + "%";
             document.getElementById("barra-totalizacao-fill").style.width = String(progressoTexto).replace(",", ".") + "%";
 
             ocultarLoading();
 
-            const listaCandidatos = dados.candidatos || [];
+            const matematicamenteDefinido = (tseData.md || "n").toLowerCase();
+            const totalizacaoFinalizada = (tseData.tf || "n").toLowerCase() === "s" || (tseData.s && String(tseData.s.pst).replace(',', '.') === '100.00');
+
+            let dadosCargo = null;
+            if (tseData.carg && Array.isArray(tseData.carg)) {
+                dadosCargo = tseData.carg.find(c => {
+                    const cdStr = String(c.cd).padStart(4, '0');
+                    return cdStr === cargoAtivo;
+                }) || tseData.carg[0];
+            } else if (tseData.carg) {
+                dadosCargo = tseData.carg;
+            } else {
+                dadosCargo = tseData;
+            }
+
+            const listaCandidatosBruta = [];
+            if (dadosCargo && dadosCargo.agr && Array.isArray(dadosCargo.agr)) {
+                dadosCargo.agr.forEach(agrupamento => {
+                    if (agrupamento.par && Array.isArray(agrupamento.par)) {
+                        agrupamento.par.forEach(partido => {
+                            const siglaPartido = partido.sg || agrupamento.nm || "PARTIDO";
+                            if (partido.cand && Array.isArray(partido.cand)) {
+                                partido.cand.forEach(c => {
+                                    listaCandidatosBruta.push({ ...c, siglaExtraida: siglaPartido });
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            const candidatosTratados = [];
+
+            listaCandidatosBruta.forEach(cand => {
+                if (!cand || typeof cand !== 'object') return;
+
+                const nomeUrna = cand.nmu || cand.nm || "";
+                const nomeCompleto = cand.nm || cand.nmu || "";
+                const numero = cand.n || cand.numero || "";
+                
+                if (!nomeUrna || !numero || nomeUrna.toUpperCase().startsWith("FEDERAÇÃO") || nomeUrna.toUpperCase().startsWith("COLIGAÇÃO")) {
+                    return;
+                }
+
+                let partido = cand.siglaExtraida || "PARTIDO";
+                if (partido === "PARTIDO" && cand.cc) {
+                    partido = cand.cc.split(" ")[0] || partido;
+                } else if (partido === "PARTIDO" && cand.sgp) {
+                    partido = cand.sgp;
+                }
+
+                const votosAbsolutos = parseInt(cand.vap || cand.tvap || cand.v || 0) || 0;
+                const porcentagemTexto = cand.pvap || cand.ppvap || cand.pv || "0,00";
+
+                let statusFinal = "N";
+                const textoSituacao = (cand.st || cand.dsit || "").toLowerCase().trim();
+                const isEleitoFlag = (cand.e === "s" || cand.e === "S");
+                const isDerrotado = textoSituacao.includes("não eleito") || 
+                                    textoSituacao.includes("nao eleito") || 
+                                    textoSituacao.includes("suplente");
+
+                if (textoSituacao.includes("2º turno") || textoSituacao.includes("segundo turno") || textoSituacao.includes("2o turno")) {
+                    statusFinal = "2T";
+                } else if (!isDerrotado) {
+                    if (textoSituacao.startsWith("eleito") || textoSituacao === "eleito" || (isEleitoFlag && textoSituacao === "")) {
+                        statusFinal = "E";
+                    }
+                }
+
+                const sqcand = cand.sqcand || cand.seq || numero;
+                const urlFoto = `${TSE_BASE}/${CICLO}/${pleito}/fotos/${uf}/${sqcand}.jpeg`;
+
+                const existente = candidatosTratados.find(c => c.numero === numero);
+                if (!existente) {
+                    candidatosTratados.push({
+                        nome: nomeCompleto,
+                        nomeUrna: nomeUrna,
+                        numero: numero,
+                        partido: partido,
+                        eleito: statusFinal,
+                        foto: urlFoto,
+                        votos: {
+                            porcentagem: porcentagemTexto,
+                            quantidade: votosAbsolutos
+                        }
+                    });
+                } else if (votosAbsolutos > existente.votos.quantidade) {
+                    existente.votos.quantidade = votosAbsolutos;
+                    existente.votos.porcentagem = porcentagemTexto;
+                    existente.nomeUrna = nomeUrna;
+                    existente.eleito = statusFinal;
+                }
+            });
+
+            candidatosTratados.sort((a, b) => b.votos.quantidade - a.votos.quantidade);
+
+            const isMajoritariaExecutivo = (cargoAtivo === '0001' || cargoAtivo === '0003');
+            const isSenador = (cargoAtivo === '0005');
+
+            if (isMajoritariaExecutivo && candidatosTratados.length > 0) {
+                if (!totalizacaoFinalizada) {
+                    if (matematicamenteDefinido === "e") {
+                        candidatosTratados[0].eleito = "MAT_ELEITO";
+                    } else if (matematicamenteDefinido === "s") {
+                        if (candidatosTratados[0]) candidatosTratados[0].eleito = "2T";
+                        if (candidatosTratados[1]) candidatosTratados[1].eleito = "2T";
+                    }
+                } else {
+                    const primeiro = candidatosTratados[0];
+                    const segundo = candidatosTratados[1];
+                    const temSegundoTurno = (primeiro && primeiro.eleito === "2T") || (segundo && segundo.eleito === "2T");
+                    if (!temSegundoTurno && primeiro) {
+                        primeiro.eleito = "E";
+                    }
+                }
+
+                for (let i = 2; i < candidatosTratados.length; i++) {
+                    candidatosTratados[i].eleito = "N";
+                }
+            } else if (isSenador && candidatosTratados.length > 0) {
+                if (totalizacaoFinalizada) {
+                    if (candidatosTratados[0]) candidatosTratados[0].eleito = "E";
+                    if (candidatosTratados[1]) candidatosTratados[1].eleito = "E";
+                }
+                for (let i = 2; i < candidatosTratados.length; i++) {
+                    candidatosTratados[i].eleito = "N";
+                }
+            }
 
             if (cargoAtivo === "0001" || cargoAtivo === "0003" || cargoAtivo === "0005") {
                 let idContainer = "lista-presidente";
                 if (cargoAtivo === "0003") idContainer = "lista-governador";
                 if (cargoAtivo === "0005") idContainer = "lista-senador";
-                renderizarCardsMajoritarios(listaCandidatos, idContainer);
+                renderizarCardsMajoritarios(candidatosTratados, idContainer);
             } else {
-                renderizarListaLegislativa(listaCandidatos, cargoAtivo === "0006" ? "lista-federais" : "lista-estaduais");
+                renderizarListaLegislativa(candidatosTratados, cargoAtivo === "0006" ? "lista-federais" : "lista-estaduais");
             }
 
             if (String(progressoTexto).replace(",", ".") === "100.00") {
@@ -479,7 +642,6 @@
                     htmlSelo = "<span class='selo-status segundo-turno'>2º Turno</span>";
                 }
 
-                // Prioridade obrigatória para o nome de urna
                 const nomeExibicao = cand.nomeUrna || cand.nmu || cand.nome || "";
                 const urlFoto = cand.foto || "";
                 const votosQtd = cand.votos ? cand.votos.quantidade : 0;
@@ -537,7 +699,6 @@
                     txtSeloLegislativo = " <span style='color: var(--laranja); font-weight: bold; font-size: 0.8rem;'>[2º TURNO]</span>";
                 }
 
-                // Prioridade obrigatória para o nome de urna
                 const nomeExibicao = cand.nomeUrna || cand.nmu || cand.nome || "";
                 const urlFoto = cand.foto || "";
                 const votosQtd = cand.votos ? cand.votos.quantidade : 0;
@@ -572,8 +733,8 @@
             if (loader) loader.style.display = "none";
         }
 
-        buscarDadosDoWorker();
-        temporizadorAtualizacao = setInterval(buscarDadosDoWorker, 60000);
+        carregarDadosTSE();
+        temporizadorAtualizacao = setInterval(carregarDadosTSE, 60000);
     </script>
 </body>
 </html>
